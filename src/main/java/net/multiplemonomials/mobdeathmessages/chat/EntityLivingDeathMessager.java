@@ -1,18 +1,41 @@
 package net.multiplemonomials.mobdeathmessages.chat;
 
+import net.multiplemonomials.mobdeathmessages.configuration.ModConfiguration;
+//import net.multiplemonomials.mobdeathmessages.util.NameUtils; hmm
+
+import net.minecraftforge.fml.common.FMLCommonHandler;
+
 import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.EntityLivingBase;
+
+import net.minecraft.entity.monster.EntityBlaze;
+
 import net.minecraft.entity.passive.EntityBat;
+import net.minecraft.entity.passive.EntitySquid;
+import net.minecraft.entity.passive.EntityTameable;
+
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
+
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.management.PlayerList;
+
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EntityDamageSource;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextComponentString;
-import net.minecraftforge.fml.common.FMLCommonHandler;
-import net.multiplemonomials.mobdeathmessages.configuration.ModConfiguration;
-import net.multiplemonomials.mobdeathmessages.util.NameUtils;
+import net.minecraft.util.text.TextComponentTranslation;
 
 public class EntityLivingDeathMessager 
 {
+	/**
+	 * Return the currently running MinecraftServer
+	 * @return 
+	 */
+	private static MinecraftServer getMinecraftServer()
+	{
+		return FMLCommonHandler.instance().getMinecraftServerInstance();
+	}
+	
 	/**
 	 * Return whether a message should be shown for the dead mob based on the circumstances of death
 	 * and the configuration of the mod
@@ -74,30 +97,70 @@ public class EntityLivingDeathMessager
 		return retval;
 	}
 	
+	/**
+	 * Print the entity death message to chat
+	 * @param deadEntity
+	 * @param damageSource
+	 */
+	// Somehow TextComponentTranslation isn't a deprecated class in Forge 1.12.2 (well at least according to the Forge documentary)
 	public static void showDeathMessage(EntityLiving deadEntity, DamageSource damageSource)
 	{
 		if(shouldShowMessage(deadEntity, damageSource))
 		{
 			ITextComponent deathMessage = deadEntity.getCombatTracker().getDeathMessage();
 			
-			String messageText = deathMessage.getUnformattedText();
-			
 			//try to fix entities that aren't named properly in the death message
-			messageText = NameUtils.trimEntityNamesInString(messageText);
-			
+			//deathMessage = NameUtils.trimEntityNamesInString(deathMessage);
 	
 			//stop this silliness
-			if(messageText.equals("Squid drowned"))
+			if(deadEntity instanceof EntitySquid)
 			{
-				messageText = "Squid asphyxiated";
+				if (damageSource == DamageSource.DROWN)
+				{
+					EntityLivingBase attacker = deadEntity.getLastAttackedEntity();
+					if (attacker != null)
+					{
+						deathMessage = new TextComponentTranslation("death.attack.asphyxiation.player", deadEntity.getDisplayName(), attacker.getDisplayName());
+					}
+					else
+					{
+						deathMessage = new TextComponentTranslation("death.attack.asphyxiation", deadEntity.getDisplayName());
+					}
+				}
+			}
+			if(deadEntity instanceof EntityBlaze)
+			{
+				if (damageSource == DamageSource.DROWN)
+				{
+					EntityLivingBase attacker = deadEntity.getLastAttackedEntity();
+					if (attacker != null)
+					{
+						deathMessage = new TextComponentTranslation("death.attack.deadlyWater.player", deadEntity.getDisplayName(), attacker.getDisplayName());
+					}
+					else
+					{
+						deathMessage = new TextComponentTranslation("death.attack.deadlyWater", deadEntity.getDisplayName());
+					}
+				}
 			}
 			
-			if(messageText.equals("Blaze drowned"))
+			//no duplicated pet death messages
+			MinecraftServer server = getMinecraftServer();
+			PlayerList playerList = server.getPlayerList();
+			if(deadEntity instanceof EntityTameable)
 			{
-				messageText = "Blaze tried to swim in water";
+				for (EntityPlayerMP player : playerList.getPlayers())
+				{
+					if(!(((EntityTameable)deadEntity).isOwner(player)))
+					{
+						player.sendMessage(deathMessage);
+					}
+				}
 			}
-			
-			FMLCommonHandler.instance().getMinecraftServerInstance().getPlayerList().sendMessage(new TextComponentString(messageText));
+			else
+			{
+				playerList.sendMessage(deathMessage);
+			}
 		}
 	}
 }
