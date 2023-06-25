@@ -184,8 +184,8 @@ public class KillingSpreeMessager
 		ITextComponent message = new TextComponentString(I18n.translateToLocal(Names.KillingSprees.MESSAGEPREFIX));
 		message.appendSibling(entityName);
 	
-		//"escape" color codes in mob names
-		//entityName.setStyle(new Style().setColor(TextFormatting.WHITE));
+		//"escape" color codes in mob names (but keep advanced info)
+		entityName.setStyle(entityName.getStyle().setColor(TextFormatting.WHITE));
 		
 		message.appendText(plural ? " are " : " is ");
 		message.appendSibling(new TextComponentString(I18n.translateToLocal(newSpree.getText(plural))));
