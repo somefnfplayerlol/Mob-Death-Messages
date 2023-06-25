@@ -14,4 +14,10 @@ message.mdm.legendaryPlural=§bLegendary!
 message.mdm.awesomePlural=§eAwesome!
 
 
-message.mdm.killingSpreeMessagePrefix=»
+message.mdm.killingSpreeMessagePrefix=» 
+
+#Unique death messages for the squid and the blaze
+death.attack.asphyxiation=%1$s asphyxiated
+death.attack.asphyxiation.player=%1$s asphyxiated whilst trying to escape %2$s
+death.attack.deadlyWater=%1$s tried to swim in water
+death.attack.deadlyWater.player=%1$s tried to swim in water to escape %2$s
