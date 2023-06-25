@@ -7,9 +7,8 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.Mod.Instance;
 import net.minecraftforge.fml.common.SidedProxy;
-import net.minecraftforge.fml.common.event.FMLInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.multiplemonomials.mobdeathmessages.data.IMDMPlayerData;
 import net.multiplemonomials.mobdeathmessages.data.MDMPlayerData;
 import net.multiplemonomials.mobdeathmessages.network.PacketHandler;
@@ -56,11 +55,5 @@ public class MobDeathMessages
         proxy.registerEventHandlers();
 
         LogHelper.info("Done loading!");
-    }
-
-    @EventHandler
-    public void postInit(FMLPostInitializationEvent event)
-    {
-    	
     }
 }
