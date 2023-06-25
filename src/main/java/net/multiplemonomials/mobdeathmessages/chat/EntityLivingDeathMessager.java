@@ -117,7 +117,7 @@ public class EntityLivingDeathMessager
 			{
 				if (damageSource == DamageSource.DROWN)
 				{
-					EntityLivingBase attacker = deadEntity.getLastAttackedEntity();
+					EntityLivingBase attacker = deadEntity.getCombatTracker().getBestAttacker();
 					if (attacker != null)
 					{
 						deathMessage = new TextComponentTranslation("death.attack.asphyxiation.player", deadEntity.getDisplayName(), attacker.getDisplayName());
@@ -132,7 +132,7 @@ public class EntityLivingDeathMessager
 			{
 				if (damageSource == DamageSource.DROWN)
 				{
-					EntityLivingBase attacker = deadEntity.getLastAttackedEntity();
+					EntityLivingBase attacker = deadEntity.getCombatTracker().getBestAttacker();
 					if (attacker != null)
 					{
 						deathMessage = new TextComponentTranslation("death.attack.deadlyWater.player", deadEntity.getDisplayName(), attacker.getDisplayName());
