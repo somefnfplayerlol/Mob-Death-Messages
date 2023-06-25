@@ -3,6 +3,7 @@ package net.multiplemonomials.mobdeathmessages.handler;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.item.EntityArmorStand;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.projectile.EntityArrow;
 import net.minecraft.util.EntityDamageSource;
@@ -20,10 +21,13 @@ public class LivingDeathEventHandler
 	public void onLivingDeathEvent(LivingDeathEvent event)
 	{
 		EntityLivingBase entity = event.getEntityLiving();
+		if (entity instanceof EntityArmorStand)
+		{
+			return; // do not.
+		}
 		
 		if(entity.isServerWorld())
 		{
-
 			if(entity instanceof EntityPlayer)
 			{
 				if(entity instanceof FakePlayer)
@@ -37,7 +41,6 @@ public class LivingDeathEventHandler
 				}
 				
 				//handle mob kill
-				
 				if(ModConfiguration.killingSpreePlayersVsMobsEnabled && event.getSource() instanceof EntityDamageSource)
 				{
 					EntityDamageSource entityDamageSource = (EntityDamageSource)event.getSource();
@@ -57,7 +60,7 @@ public class LivingDeathEventHandler
 					{
 						KillingSpreeMessager.handlePlayerKill((EntityPlayer)sourceEntity, entity);
 					}
-					else if(sourceEntity instanceof EntityLiving)
+					else
 					{
 						KillingSpreeMessager.handleMobKill((EntityLiving) sourceEntity);
 					}
@@ -65,7 +68,7 @@ public class LivingDeathEventHandler
 				}
 					
 			}
-			else if(entity instanceof EntityLiving)
+			else
 			{
 				if(event.getSource() instanceof EntityDamageSource)
 				{
@@ -87,7 +90,7 @@ public class LivingDeathEventHandler
 								KillingSpreeMessager.handlePlayerKill(attackingPlayer, (EntityLiving) entity);
 							}
 						}
-						else if(source instanceof EntityLiving && ModConfiguration.killingSpreeMobsVsMobsEnabled)
+						else if(ModConfiguration.killingSpreeMobsVsMobsEnabled)
 						{
 							KillingSpreeMessager.handleMobKill((EntityLiving) source);
 							KillingSpreeMessager.handleMobDeath((EntityLiving) entity);
