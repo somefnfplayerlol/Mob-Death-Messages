@@ -1,5 +1,7 @@
 package net.multiplemonomials.mobdeathmessages.chat;
 
+import net.minecraftforge.fml.common.FMLCommonHandler;
+
 import java.util.HashMap;
 
 import org.atteo.evo.inflector.English;
@@ -7,12 +9,15 @@ import org.atteo.evo.inflector.English;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+
+import net.minecraft.init.SoundEvents;
+
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.Style;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.translation.I18n;
-import net.minecraftforge.fml.common.FMLCommonHandler;
+
 import net.multiplemonomials.mobdeathmessages.MobDeathMessages;
 import net.multiplemonomials.mobdeathmessages.configuration.ModConfiguration;
 import net.multiplemonomials.mobdeathmessages.data.IMDMPlayerData;
@@ -51,12 +56,13 @@ public class KillingSpreeMessager
 			//higher ordinals = better killing sprees
 			if(newSpree.ordinal() > data.getCurrentKillingSpree().ordinal())
 			{
-				showKillingSpreeMessage(NameUtils.trimEntityNamesInString(player.getName()), false, newSpree);
+				showKillingSpreeMessage(player.getDisplayName(), false, newSpree);
 				
 				//give the player XP
 				int expAmount = ModConfiguration.xpForKillingSpree * (1 << (newSpree.ordinal() - KillingSpree.KILLINGSPREE.ordinal()));
 				LogHelper.info("Giving " + player.getName() + " " + expAmount + " xp for their " + newSpree.toString().toLowerCase());
 				player.addExperience(expAmount);
+				player.playSound(SoundEvents.ENTITY_PLAYER_LEVELUP, (float) 1, 1);
 			}
 			
 			data.setCurrentKillingSpree(newSpree);
@@ -93,7 +99,7 @@ public class KillingSpreeMessager
 			{
 	
 				String friendlyPluralMobName = English.plural(NameUtils.getEntityNameForDisplay(attackingEntity));
-				showKillingSpreeMessage(friendlyPluralMobName, true, newSpree);
+				showKillingSpreeMessage(new TextComponentString(friendlyPluralMobName), true, newSpree);
 			}
 			
 		}
@@ -130,7 +136,7 @@ public class KillingSpreeMessager
 			if(newSpree.ordinal() < previousSpree.ordinal())
 			{
 				String friendlyPluralMobName = English.plural(NameUtils.getEntityNameForDisplay(deadEntity));
-				showKillingSpreeMessage(friendlyPluralMobName, true, newSpree);
+				showKillingSpreeMessage(new TextComponentString(friendlyPluralMobName), true, newSpree);
 			}
 		}
 		
@@ -160,27 +166,26 @@ public class KillingSpreeMessager
 			//lower ordinals = better dying sprees
 			if(newSpree.ordinal() < data.getCurrentKillingSpree().ordinal() && newSpree != KillingSpree.NONE)
 			{
-				showKillingSpreeMessage(NameUtils.trimEntityNamesInString(player.getName()), false, newSpree);
+				showKillingSpreeMessage(player.getDisplayName(), false, newSpree);
 			}
 			data.setCurrentKillingSpree(newSpree);
 		}
 	}
 
 	/**
-	 * 
+	 * Broadcast the killing spree message to the server.
 	 * @param entityName
 	 * @param plural Whether or not the entityName is plural.
 	 * @param newSpree
 	 */
-	@SuppressWarnings("deprecation") // we actually DON'T want to use TextComponentTranslation for this because the mod isn't installed on the client so the language files won't exist
-	private static void showKillingSpreeMessage(String entityName, boolean plural, KillingSpree newSpree)
+	// Only if I could update this to 1.13 (or newer)...
+	private static void showKillingSpreeMessage(ITextComponent entityName, boolean plural, KillingSpree newSpree)
 	{
 		ITextComponent message = new TextComponentString(I18n.translateToLocal(Names.KillingSprees.MESSAGEPREFIX));
-		message.appendText(entityName);
-		
-		ITextComponent mobName = new TextComponentString(entityName);
+		message.appendSibling(entityName);
+	
 		//"escape" color codes in mob names
-		mobName.setStyle(new Style().setColor(TextFormatting.WHITE));
+		//entityName.setStyle(new Style().setColor(TextFormatting.WHITE));
 		
 		message.appendText(plural ? " are " : " is ");
 		message.appendSibling(new TextComponentString(I18n.translateToLocal(newSpree.getText(plural))));
